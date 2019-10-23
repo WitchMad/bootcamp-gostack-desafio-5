@@ -42,14 +42,18 @@ export default class Main extends Component {
 
     this.setState({ loading: 1, error: false });
 
-    const { newRepo, repositories } = this.state;
-
     try {
-      const hasRep = repositories.find(r => r.name === newRepo);
+      const { newRepo, repositories } = this.state;
 
-      if (hasRep) throw new Error('Repositório Duplicado');
+      if (newRepo === '') throw Error('Você precisa indicar um repositório');
 
       const response = await api.get(`/repos/${newRepo}`);
+
+      const hasRepo = repositories.find(
+        r => r.name === response.data.full_name
+      );
+
+      if (hasRepo) throw Error('Repositório duplicado');
 
       const data = {
         name: response.data.full_name,
@@ -58,7 +62,6 @@ export default class Main extends Component {
       this.setState({
         repositories: [...repositories, data],
         newRepo: '',
-        loading: 0,
       });
     } catch (error) {
       this.setState({ error: true });
