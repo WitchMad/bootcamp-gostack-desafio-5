@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import api from '../../services/api';
 import Container from '../../components/Container';
 import { Form, SubmitButton, List } from './styles';
+
+toast.configure();
 
 export default class Main extends Component {
   state = {
@@ -45,7 +49,7 @@ export default class Main extends Component {
     try {
       const { newRepo, repositories } = this.state;
 
-      if (newRepo === '') throw Error('Você precisa indicar um repositório');
+      if (newRepo === '') throw Error('You need to inform a repository');
 
       const response = await api.get(`/repos/${newRepo}`);
 
@@ -53,7 +57,7 @@ export default class Main extends Component {
         r => r.name === response.data.full_name
       );
 
-      if (hasRepo) throw Error('Repositório duplicado');
+      if (hasRepo) throw Error('This repository already exists');
 
       const data = {
         name: response.data.full_name,
@@ -65,6 +69,7 @@ export default class Main extends Component {
       });
     } catch (error) {
       this.setState({ error: true });
+      toast.error(error.response ? error.response.data.message : error.message);
     } finally {
       this.setState({ loading: false });
     }
